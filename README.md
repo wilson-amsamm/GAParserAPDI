@@ -1,2 +1,85 @@
-# GAParserAPDI
-GAParserAPDI for automaton of Google Analytic Reports
+# GAParser
+
+Config-driven GA4 reporting CLI for multi-property website summaries.
+
+## What it does
+
+- Loads website-to-property mappings from `config/properties.json`
+- Pulls `activeUsers` and `screenPageViews` for a date range
+- Prints a formatted summary
+- Optionally exports to `txt`, `csv`, and `json`
+
+## Project layout
+
+- `src/ga_reporter/` application code
+- `config/` property config files
+- `reports/` generated outputs
+- `tests/` unit tests
+
+## Setup
+
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+```
+
+## Configure properties
+
+1. Copy `config/properties.example.json` to `config/properties.json`
+2. Fill in your GA4 property IDs
+
+## Authentication
+
+Use one of:
+
+- `--service-account path\to\service_account.json`
+- `GOOGLE_APPLICATION_CREDENTIALS` environment variable
+
+Also add the service account email to each GA4 property with at least Viewer access.
+
+## Run
+
+Custom range:
+
+```powershell
+python ga_summary.py --filter range --start 2026-02-01 --end 2026-02-15
+```
+
+Preset filters:
+
+```powershell
+python ga_summary.py --filter daily
+python ga_summary.py --filter weekly
+python ga_summary.py --filter monthly
+```
+
+Use Google organic Search Console impressions instead of page/screen views:
+
+```powershell
+python ga_summary.py --filter weekly --impressions-metric organicGoogleSearchImpressions
+```
+
+Single command with numbered menu:
+
+```powershell
+python ga_summary.py --menu
+```
+
+With exports:
+
+```powershell
+python ga_summary.py `
+  --filter range `
+  --start 2026-02-01 `
+  --end 2026-02-15 `
+  --export-txt reports\website_summary.txt `
+  --export-csv reports\website_summary.csv `
+  --export-json reports\website_summary.json
+```
+
+## Test
+
+```powershell
+python -m unittest discover -s tests -v
+```

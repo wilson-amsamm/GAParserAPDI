@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+*.pyc
+*.pyo
+reports/*.txt
+reports/*.csv
+reports/*.json
+config/properties.json
+service_account.json
+cool2025-*.json
+quantum-spring-*.json
