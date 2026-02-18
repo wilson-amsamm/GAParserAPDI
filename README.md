@@ -83,3 +83,28 @@ python ga_summary.py `
 ```powershell
 python -m unittest discover -s tests -v
 ```
+
+## Compile and Package (Windows)
+
+Install build dependency:
+
+```powershell
+pip install -r requirements-build.txt
+```
+
+Build executable and release folder:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\build_exe.ps1
+```
+
+This creates:
+
+- `dist\GAParserCLI.exe`
+- `release\GAParserCLI\` (exe + README + config template + quickstart)
+
+Create a zip package:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\package_release.ps1
+```

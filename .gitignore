@@ -11,3 +11,7 @@ config/properties.json
 service_account.json
 cool2025-*.json
 quantum-spring-*.json
+dist/
+build/
+release/
+GAParserCLI.spec
