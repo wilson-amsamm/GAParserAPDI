@@ -5,6 +5,20 @@ import tests._path  # noqa: F401
 from ga_reporter.models import DateRange, MetricSummary, PropertyConfig
 
 
+def make_summary(site: str = "Site A") -> MetricSummary:
+    return MetricSummary(
+        site_name=site,
+        visitors=1,
+        impressions=2,
+        avg_daily_visitors_2025=3.0,
+        avg_daily_impressions_2025=4.0,
+        expected_visitors_for_period_2025=5.0,
+        expected_impressions_for_period_2025=6.0,
+        visitors_change_pct_vs_2025_avg=-80.0,
+        impressions_change_pct_vs_2025_avg=-66.67,
+    )
+
+
 class TestCLI(unittest.TestCase):
     @patch("ga_reporter.cli.export_json")
     @patch("ga_reporter.cli.export_csv")
@@ -32,7 +46,7 @@ class TestCLI(unittest.TestCase):
         )
         mock_load.return_value = [PropertyConfig(site_name="Site A", property_id="1")]
         mock_client_cls.return_value = object()
-        mock_build.return_value = [MetricSummary(site_name="Site A", visitors=1, impressions=2)]
+        mock_build.return_value = [make_summary()]
         mock_format.return_value = "Website Metrics Summary:\n- Site A"
 
         from ga_reporter.cli import main
@@ -77,7 +91,7 @@ class TestCLI(unittest.TestCase):
         )
         mock_load.return_value = [PropertyConfig(site_name="Site A", property_id="1")]
         mock_client_cls.return_value = object()
-        mock_build.return_value = [MetricSummary(site_name="Site A", visitors=1, impressions=2)]
+        mock_build.return_value = [make_summary()]
         mock_format.return_value = "Website Metrics Summary:\n- Site A"
 
         from ga_reporter.cli import main
@@ -113,7 +127,7 @@ class TestCLI(unittest.TestCase):
         )
         mock_load.return_value = [PropertyConfig(site_name="Site A", property_id="1")]
         mock_client_cls.return_value = object()
-        mock_build.return_value = [MetricSummary(site_name="Site A", visitors=1, impressions=2)]
+        mock_build.return_value = [make_summary()]
         mock_format.return_value = "Website Metrics Summary:\n- Site A"
 
         from ga_reporter.cli import main
@@ -143,7 +157,7 @@ class TestCLI(unittest.TestCase):
         )
         mock_load.return_value = [PropertyConfig(site_name="Site A", property_id="1")]
         mock_client_cls.return_value = object()
-        mock_build.return_value = [MetricSummary(site_name="Site A", visitors=1, impressions=2)]
+        mock_build.return_value = [make_summary()]
         mock_format.return_value = "Website Metrics Summary:\n- Site A"
 
         from ga_reporter.cli import main

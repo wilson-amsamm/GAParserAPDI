@@ -11,7 +11,11 @@ class FakeClient:
 
     def fetch_metrics(self, property_id: str, start_date: str, end_date: str) -> tuple[int, int]:
         self.calls += 1
-        return (int(property_id), int(property_id) + 10)
+        if start_date == "2025-01-01" and end_date == "2025-12-31":
+            # Yearly baseline totals.
+            return (365, 730)
+        # Current range totals.
+        return (10, 20)
 
 
 class FlakyClient:
@@ -23,6 +27,8 @@ class FlakyClient:
         self.calls += 1
         if self.calls <= self.fail_count:
             raise RuntimeError("temporary failure")
+        if start_date == "2025-01-01" and end_date == "2025-12-31":
+            return (365, 730)
         return (5, 15)
 
 
@@ -41,9 +47,12 @@ class TestReporter(unittest.TestCase):
 
         result = build_summary(client, properties, "2026-02-01", "2026-02-15")
         self.assertEqual(len(result), 2)
-        self.assertEqual(result[0].visitors, 1)
-        self.assertEqual(result[1].impressions, 12)
-        self.assertEqual(client.calls, 2)
+        self.assertEqual(result[0].visitors, 10)
+        self.assertEqual(result[1].impressions, 20)
+        self.assertAlmostEqual(result[0].avg_daily_visitors_2025, 1.0)
+        self.assertAlmostEqual(result[0].expected_visitors_for_period_2025, 15.0)
+        self.assertAlmostEqual(result[0].visitors_change_pct_vs_2025_avg, -33.3333, places=3)
+        self.assertEqual(client.calls, 4)
 
     def test_retry_then_success(self) -> None:
         client = FlakyClient(fail_count=1)
@@ -59,7 +68,7 @@ class TestReporter(unittest.TestCase):
         )
         self.assertEqual(len(result), 1)
         self.assertEqual(result[0].visitors, 5)
-        self.assertEqual(client.calls, 2)
+        self.assertEqual(client.calls, 3)
 
     def test_continue_on_error_outputs_zeroes(self) -> None:
         client = AlwaysFailClient()
@@ -76,6 +85,7 @@ class TestReporter(unittest.TestCase):
         )
         self.assertEqual(result[0].visitors, 0)
         self.assertEqual(result[0].impressions, 0)
+        self.assertEqual(result[0].visitors_change_pct_vs_2025_avg, 0.0)
 
 
 if __name__ == "__main__":
