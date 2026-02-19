@@ -101,7 +101,15 @@ powershell -ExecutionPolicy Bypass -File .\scripts\build_exe.ps1
 This creates:
 
 - `dist\GAParserCLI.exe`
+- `dist\GAParserStart.exe` (interactive launcher wrapper)
 - `release\GAParserCLI\` (exe + README + config template + quickstart)
+
+Launcher convenience:
+
+- Place your service account key next to `GAParserStart.exe` and rename it to `service_account.json`.
+- Then run `GAParserStart.exe` without extra arguments.
+- `GAParserStart.exe` auto-saves report text to `out\website_summary_YYYYMMDD_HHMMSS.txt`.
+- `GAParserStart.exe` waits for `Enter` before closing so output stays visible.
 
 Create a zip package:
 

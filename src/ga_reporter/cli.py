@@ -85,12 +85,15 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv or sys.argv[1:])
+    raw_argv = sys.argv[1:] if argv is None else argv
+    args = parse_args(raw_argv)
 
     try:
         selected_filter = args.filter
         selected_start = args.start
         selected_end = args.end
+        if not raw_argv:
+            args.menu = True
         if args.menu:
             selected_filter, selected_start, selected_end = prompt_filter_selection()
 

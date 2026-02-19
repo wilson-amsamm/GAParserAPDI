@@ -15,3 +15,5 @@ dist/
 build/
 release/
 GAParserCLI.spec
+GAParserStart.spec
+out/

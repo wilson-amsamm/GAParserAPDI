@@ -137,6 +137,38 @@ class TestCLI(unittest.TestCase):
         self.assertEqual(code, 0)
         mock_resolve_date_range.assert_called_once_with("range", "2026-02-01", "2026-02-15")
 
+    @patch("builtins.input", side_effect=["1"])
+    @patch("builtins.print")
+    @patch("ga_reporter.cli.format_text_summary")
+    @patch("ga_reporter.cli.build_summary")
+    @patch("ga_reporter.cli.GADataClient")
+    @patch("ga_reporter.cli.load_property_config")
+    @patch("ga_reporter.cli.resolve_date_range")
+    def test_main_no_args_defaults_to_menu(
+        self,
+        mock_resolve_date_range,
+        mock_load,
+        mock_client_cls,
+        mock_build,
+        mock_format,
+        _mock_print,
+        _mock_input,
+    ) -> None:
+        mock_resolve_date_range.return_value = DateRange(
+            start_date="2026-02-18", end_date="2026-02-18"
+        )
+        mock_load.return_value = [PropertyConfig(site_name="Site A", property_id="1")]
+        mock_client_cls.return_value = object()
+        mock_build.return_value = [make_summary()]
+        mock_format.return_value = "Website Metrics Summary:\n- Site A"
+
+        from ga_reporter.cli import main
+
+        code = main([])
+
+        self.assertEqual(code, 0)
+        mock_resolve_date_range.assert_called_once_with("daily", None, None)
+
     @patch("builtins.print")
     @patch("ga_reporter.cli.format_text_summary")
     @patch("ga_reporter.cli.build_summary")
