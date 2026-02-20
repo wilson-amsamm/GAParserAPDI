@@ -1,5 +1,6 @@
 import unittest
 from unittest.mock import patch
+from unittest.mock import Mock
 
 import tests._path  # noqa: F401
 from ga_reporter.models import DateRange, MetricSummary, PropertyConfig
@@ -102,7 +103,7 @@ class TestCLI(unittest.TestCase):
         mock_resolve_date_range.assert_called_once_with("daily", None, None)
         mock_client_cls.assert_called_once_with(
             service_account_path=None,
-            impressions_metric="screenPageViews",
+            impressions_metric="organicGoogleSearchImpressions",
         )
 
     @patch("builtins.input", side_effect=["4", "2026-02-01", "2026-02-15"])
@@ -212,6 +213,48 @@ class TestCLI(unittest.TestCase):
             service_account_path=None,
             impressions_metric="organicGoogleSearchImpressions",
         )
+
+    @patch("builtins.print")
+    @patch("ga_reporter.cli.format_text_summary")
+    @patch("ga_reporter.cli.build_summary")
+    @patch("ga_reporter.cli.GADataClient")
+    @patch("ga_reporter.cli.load_property_config")
+    @patch("ga_reporter.cli.resolve_date_range")
+    def test_main_prints_client_warnings(
+        self,
+        mock_resolve_date_range,
+        mock_load,
+        mock_client_cls,
+        mock_build,
+        mock_format,
+        mock_print,
+    ) -> None:
+        mock_resolve_date_range.return_value = DateRange(
+            start_date="2026-02-01", end_date="2026-02-15"
+        )
+        mock_load.return_value = [PropertyConfig(site_name="Site A", property_id="1")]
+        client_mock = Mock()
+        client_mock.get_warnings.return_value = ["Fallback used."]
+        mock_client_cls.return_value = client_mock
+        mock_build.return_value = [make_summary()]
+        mock_format.return_value = "Website Metrics Summary:\n- Site A"
+
+        from ga_reporter.cli import main
+
+        code = main(
+            [
+                "--filter",
+                "range",
+                "--start",
+                "2026-02-01",
+                "--end",
+                "2026-02-15",
+            ]
+        )
+
+        self.assertEqual(code, 0)
+        mock_print.assert_any_call("\nWarnings:")
+        mock_print.assert_any_call("- Fallback used.")
 
 
 if __name__ == "__main__":

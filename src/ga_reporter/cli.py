@@ -60,8 +60,8 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     )
     parser.add_argument(
         "--impressions-metric",
-        choices=["screenPageViews", "organicGoogleSearchImpressions"],
-        default="screenPageViews",
+        choices=["organicGoogleSearchImpressions"],
+        default="organicGoogleSearchImpressions",
         help="Metric used for the 'Impressions' field in output.",
     )
     parser.add_argument("--export-txt", help="Optional path to export text report")
@@ -118,6 +118,12 @@ def main(argv: list[str] | None = None) -> int:
 
     text_summary = format_text_summary(summary, date_range)
     print(text_summary)
+    if hasattr(client, "get_warnings"):
+        warnings = client.get_warnings()
+        if warnings:
+            print("\nWarnings:")
+            for warning in warnings:
+                print(f"- {warning}")
 
     if args.export_txt:
         export_text(args.export_txt, text_summary)

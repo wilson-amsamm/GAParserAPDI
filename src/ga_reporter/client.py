@@ -10,7 +10,7 @@ class GADataClient:
     def __init__(
         self,
         service_account_path: Optional[str] = None,
-        impressions_metric: str = "screenPageViews",
+        impressions_metric: str = "organicGoogleSearchImpressions",
     ) -> None:
         try:
             from google.analytics.data_v1beta import BetaAnalyticsDataClient
@@ -27,32 +27,75 @@ class GADataClient:
             )
 
         self._client = BetaAnalyticsDataClient(credentials=credentials)
+        if impressions_metric != "organicGoogleSearchImpressions":
+            raise ValueError(
+                "Only 'organicGoogleSearchImpressions' is supported for impressions."
+            )
         self._impressions_metric = impressions_metric
+        self._warnings: list[str] = []
 
-    def fetch_metrics(self, property_id: str, start_date: str, end_date: str) -> Tuple[int, int]:
+    def get_warnings(self) -> list[str]:
+        return list(self._warnings)
+
+    def _record_warning(self, message: str) -> None:
+        if message not in self._warnings:
+            self._warnings.append(message)
+
+    def _fetch_metric_total(
+        self,
+        property_id: str,
+        metric_name: str,
+        start_date: str,
+        end_date: str,
+        dimension_name: str | None = None,
+    ) -> int:
         # Import lazily so tests can run without google packages.
         from google.analytics.data_v1beta.types import RunReportRequest
 
-        users_request = RunReportRequest(
-            property=f"properties/{property_id}",
-            metrics=[{"name": "activeUsers"}],
-            date_ranges=[{"start_date": start_date, "end_date": end_date}],
+        request_kwargs = {
+            "property": f"properties/{property_id}",
+            "metrics": [{"name": metric_name}],
+            "date_ranges": [{"start_date": start_date, "end_date": end_date}],
+        }
+        if dimension_name:
+            request_kwargs["dimensions"] = [{"name": dimension_name}]
+            request_kwargs["limit"] = 10000
+
+        response = self._client.run_report(RunReportRequest(**request_kwargs))
+        if not response.rows:
+            return 0
+
+        if not dimension_name:
+            return int(response.rows[0].metric_values[0].value)
+        return sum(int(row.metric_values[0].value) for row in response.rows)
+
+    def fetch_metrics(self, property_id: str, start_date: str, end_date: str) -> Tuple[int, int]:
+        visitors = self._fetch_metric_total(
+            property_id=property_id,
+            metric_name="activeUsers",
+            start_date=start_date,
+            end_date=end_date,
+            dimension_name=None,
         )
-        impressions_request = RunReportRequest(
-            property=f"properties/{property_id}",
-            metrics=[{"name": self._impressions_metric}],
-            date_ranges=[{"start_date": start_date, "end_date": end_date}],
-        )
 
-        users_response = self._client.run_report(users_request)
-        impressions_response = self._client.run_report(impressions_request)
+        try:
+            impressions = self._fetch_metric_total(
+                property_id=property_id,
+                metric_name=self._impressions_metric,
+                start_date=start_date,
+                end_date=end_date,
+                dimension_name="landingPagePlusQueryString",
+            )
+            if impressions == 0:
+                self._record_warning(
+                    f"Impressions returned no rows for property '{property_id}' in "
+                    f"{start_date} to {end_date} using landingPagePlusQueryString aggregation."
+                )
+        except Exception as exc:
+            impressions = 0
+            self._record_warning(
+                f"Impressions query failed for property '{property_id}' in {start_date} to "
+                f"{end_date} using landingPagePlusQueryString aggregation: {exc}"
+            )
 
-        visitors_raw = "0"
-        if users_response.rows:
-            visitors_raw = users_response.rows[0].metric_values[0].value
-
-        impressions_raw = "0"
-        if impressions_response.rows:
-            impressions_raw = impressions_response.rows[0].metric_values[0].value
-
-        return (int(visitors_raw), int(impressions_raw))
+        return (visitors, impressions)

@@ -5,7 +5,9 @@ Config-driven GA4 reporting CLI for multi-property website summaries.
 ## What it does
 
 - Loads website-to-property mappings from `config/properties.json`
-- Pulls `activeUsers` and `screenPageViews` for a date range
+- Pulls `activeUsers` and `organicGoogleSearchImpressions` by default
+- Keeps impressions strictly on `organicGoogleSearchImpressions` (no `screenPageViews` fallback)
+- Aggregates impressions using the `landingPagePlusQueryString` breakdown to align with GA4 Search Console traffic reports
 - Prints a formatted summary
 - Optionally exports to `txt`, `csv`, and `json`
 
@@ -54,7 +56,7 @@ python ga_summary.py --filter weekly
 python ga_summary.py --filter monthly
 ```
 
-Use Google organic Search Console impressions instead of page/screen views:
+Use the organic impressions metric explicitly:
 
 ```powershell
 python ga_summary.py --filter weekly --impressions-metric organicGoogleSearchImpressions

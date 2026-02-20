@@ -5,6 +5,33 @@ param(
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
+function Find-ServiceAccountJsonPath {
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepoRoot
+    )
+
+    $preferredPath = Join-Path $RepoRoot "service_account.json"
+    if (Test-Path $preferredPath) {
+        return $preferredPath
+    }
+
+    $jsonFiles = Get-ChildItem -Path $RepoRoot -Filter "*.json" -File
+    foreach ($jsonFile in $jsonFiles) {
+        try {
+            $jsonData = Get-Content -Path $jsonFile.FullName -Raw | ConvertFrom-Json -ErrorAction Stop
+            if ($null -ne $jsonData.type -and $jsonData.type -eq "service_account") {
+                return $jsonFile.FullName
+            }
+        }
+        catch {
+            continue
+        }
+    }
+
+    return $null
+}
+
 $repoRoot = Split-Path -Parent $PSScriptRoot
 Set-Location $repoRoot
 
@@ -43,6 +70,22 @@ Copy-Item "dist\\GAParserCLI.exe" (Join-Path $releaseRoot "GAParserCLI.exe") -Fo
 Copy-Item "dist\\GAParserStart.exe" (Join-Path $releaseRoot "GAParserStart.exe") -Force
 Copy-Item "README.md" (Join-Path $releaseRoot "README.md") -Force
 Copy-Item "config\\properties.example.json" (Join-Path $releaseRoot "config\\properties.example.json") -Force
+
+$propertiesPath = Join-Path $repoRoot "config\\properties.json"
+if (Test-Path $propertiesPath) {
+    Copy-Item $propertiesPath (Join-Path $releaseRoot "config\\properties.json") -Force
+}
+else {
+    Write-Host "Warning: config\\properties.json not found; skipped copy."
+}
+
+$serviceAccountSource = Find-ServiceAccountJsonPath -RepoRoot $repoRoot
+if ($null -ne $serviceAccountSource) {
+    Copy-Item $serviceAccountSource (Join-Path $releaseRoot "service_account.json") -Force
+}
+else {
+    Write-Host "Warning: No service account JSON found in repo root; skipped copy."
+}
 
 $quickStart = @"
 GAParser CLI Quick Start
