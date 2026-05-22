@@ -1,0 +1,28 @@
+{
+  "accounts": [
+    {
+      "platform": "facebook_page",
+      "account_id": "YOUR_FACEBOOK_PAGE_ID",
+      "profile_name": "Royal Hang Tock Facebook Page",
+      "metrics": [
+        "page_impressions",
+        "page_reach",
+        "page_engaged_users",
+        "page_fans"
+      ],
+      "notes": "Requires a Page access token with pages_read_engagement."
+    },
+    {
+      "platform": "instagram_business",
+      "account_id": "YOUR_INSTAGRAM_BUSINESS_ACCOUNT_ID",
+      "profile_name": "Royal Hang Tock Instagram",
+      "metrics": [
+        "impressions",
+        "reach",
+        "profile_views",
+        "follower_count"
+      ],
+      "notes": "Requires an Instagram business or creator account connected through Meta."
+    }
+  ]
+}

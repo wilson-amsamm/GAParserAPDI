@@ -1,0 +1,22 @@
+{
+  "targets": [
+    {
+      "profile_name": "TikTok Shop PH",
+      "overview_url": "https://seller-ph.tiktok.com/compass/data-overview?shop_region=PH",
+      "external_id": "",
+      "region": "PH",
+      "expected_markers": [
+        "seller-ph.tiktok.com",
+        "Shop region"
+      ],
+      "notes": "TikTok Seller Center shop analytics overview.",
+      "label_map": {
+        "Gross revenue": "gross_revenue",
+        "Items sold": "items_sold",
+        "Page views": "page_views",
+        "Visitors": "visitors",
+        "Conversion rate": "conversion_rate"
+      }
+    }
+  ]
+}

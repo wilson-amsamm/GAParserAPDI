@@ -1,0 +1,38 @@
+{
+  "targets": [
+    {
+      "profile_name": "Royal Hang Tock Facebook Page",
+      "platform": "facebook_page",
+      "insights_url": "https://business.facebook.com/latest/insights/overview/?page_id=YOUR_PAGE_ID&asset_id=YOUR_PAGE_ID",
+      "label_map": {
+        "Views": "views",
+        "Viewers": "viewers",
+        "Content interactions": "content_interactions",
+        "Link clicks": "link_clicks",
+        "Facebook visits": "facebook_visits",
+        "Follows": "follows",
+        "Unfollows": "unfollows",
+        "Net follows": "net_follows"
+      },
+      "period_preset": "weekly",
+      "notes": "Captured from Meta Business Suite overview."
+    },
+    {
+      "profile_name": "Royal Hang Tock Instagram",
+      "platform": "instagram_business",
+      "insights_url": "https://business.facebook.com/latest/insights/overview/?page_id=YOUR_PAGE_ID&asset_id=YOUR_PAGE_ID&platform=Instagram",
+      "label_map": {
+        "Views": "views",
+        "Reach": "reach",
+        "Content interactions": "content_interactions",
+        "Link clicks": "link_clicks",
+        "Visits": "visits",
+        "Follows": "follows",
+        "Unfollows": "unfollows",
+        "Net follows": "net_follows"
+      },
+      "period_preset": "weekly",
+      "notes": "Captured from Meta Business Suite Instagram results view."
+    }
+  ]
+}

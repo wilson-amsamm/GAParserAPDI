@@ -4,13 +4,39 @@ __pycache__/
 .mypy_cache/
 *.pyc
 *.pyo
-reports/*.txt
-reports/*.csv
-reports/*.json
+
+# Local secrets and machine-specific config.
+# Keep example files visible so they can be tracked.
+.streamlit/config.toml
+.streamlit/secrets.toml
 config/properties.json
+config/meta_accounts.json
+config/meta_capture_targets.json
+config/social_profiles.json
+config/tiktok_targets.json
 service_account.json
 cool2025-*.json
 quantum-spring-*.json
+
+# Browser automation and runtime output.
+.playwright/
+logs/
+debug/
+
+# Captured/exported data artifacts.
+data/meta_business_suite_exports/
+data/meta_business_suite_records.json
+data/tiktok_shop_records.json
+reference_historical/
+
+# Local scratch files.
+/TiktokWeeklyUpsert.xlsx
+/image.png
+
+# Generated reports and packaged builds.
+reports/*.txt
+reports/*.csv
+reports/*.json
 dist/
 build/
 release/

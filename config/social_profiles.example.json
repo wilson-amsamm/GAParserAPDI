@@ -1,0 +1,38 @@
+{
+  "profiles": [
+    {
+      "platform": "meta_page_insights",
+      "profile_name": "Royal Hang Tock Facebook Page",
+      "source": "manual_export",
+      "metrics": {
+        "page_followers": 12450,
+        "reach": 42800,
+        "engaged_users": 3120,
+        "post_impressions": 58700
+      },
+      "notes": "Populate from Meta Business Suite Page Insights export."
+    },
+    {
+      "platform": "instagram_business",
+      "profile_name": "Royal Hang Tock Instagram",
+      "source": "manual_export",
+      "metrics": {
+        "instagram_followers": 9310,
+        "accounts_reached": 22100,
+        "content_interactions": 1840
+      },
+      "notes": "Supports manual snapshots today; can be replaced with API ingestion later."
+    },
+    {
+      "platform": "linkedin_company",
+      "profile_name": "Royal Hang Tock LinkedIn",
+      "source": "manual_export",
+      "metrics": {
+        "followers": 2140,
+        "impressions": 7800,
+        "clicks": 260
+      },
+      "notes": "Use this for non-Meta social channels in the same dashboard."
+    }
+  ]
+}
