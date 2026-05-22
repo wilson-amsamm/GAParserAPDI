@@ -1,9 +1,14 @@
+from collections import defaultdict
+import sys
 from typing import Optional, Protocol, Tuple
 
 
 class AnalyticsMetricsClient(Protocol):
     def fetch_metrics(self, property_id: str, start_date: str, end_date: str) -> Tuple[int, int]:
         """Return (visitors, impressions) for a property/date range."""
+
+    def fetch_daily_metrics(self, property_id: str, start_date: str, end_date: str) -> list[dict[str, int | str]]:
+        """Return daily metric rows for a property/date range."""
 
 
 class GADataClient:
@@ -17,7 +22,10 @@ class GADataClient:
             from google.oauth2 import service_account
         except ImportError as exc:
             raise ImportError(
-                "Missing dependency. Install with: pip install -r requirements.txt"
+                "GA4 runtime import failed. "
+                f"Python: {sys.executable}. "
+                "Expected modules: google.analytics.data_v1beta and google.oauth2. "
+                f"Original error: {exc}"
             ) from exc
 
         credentials = None
@@ -69,6 +77,36 @@ class GADataClient:
             return int(response.rows[0].metric_values[0].value)
         return sum(int(row.metric_values[0].value) for row in response.rows)
 
+    def _fetch_metric_daily(
+        self,
+        property_id: str,
+        metric_name: str,
+        start_date: str,
+        end_date: str,
+        dimension_name: str | None = None,
+    ) -> dict[str, int]:
+        from google.analytics.data_v1beta.types import RunReportRequest
+
+        request_kwargs = {
+            "property": f"properties/{property_id}",
+            "metrics": [{"name": metric_name}],
+            "date_ranges": [{"start_date": start_date, "end_date": end_date}],
+            "dimensions": [{"name": "date"}],
+            "limit": 10000,
+        }
+        if dimension_name:
+            request_kwargs["dimensions"].append({"name": dimension_name})
+
+        response = self._client.run_report(RunReportRequest(**request_kwargs))
+        if not response.rows:
+            return {}
+
+        daily_totals: dict[str, int] = defaultdict(int)
+        for row in response.rows:
+            date_key = row.dimension_values[0].value
+            daily_totals[date_key] += int(row.metric_values[0].value)
+        return dict(daily_totals)
+
     def fetch_metrics(self, property_id: str, start_date: str, end_date: str) -> Tuple[int, int]:
         visitors = self._fetch_metric_total(
             property_id=property_id,
@@ -99,3 +137,42 @@ class GADataClient:
             )
 
         return (visitors, impressions)
+
+    def fetch_daily_metrics(self, property_id: str, start_date: str, end_date: str) -> list[dict[str, int | str]]:
+        visitors_by_day = self._fetch_metric_daily(
+            property_id=property_id,
+            metric_name="activeUsers",
+            start_date=start_date,
+            end_date=end_date,
+            dimension_name=None,
+        )
+
+        try:
+            impressions_by_day = self._fetch_metric_daily(
+                property_id=property_id,
+                metric_name=self._impressions_metric,
+                start_date=start_date,
+                end_date=end_date,
+                dimension_name=None,
+            )
+            if not impressions_by_day:
+                self._record_warning(
+                    f"Daily impressions returned no rows for property '{property_id}' in "
+                    f"{start_date} to {end_date} using date aggregation."
+                )
+        except Exception as exc:
+            impressions_by_day = {}
+            self._record_warning(
+                f"Daily impressions query failed for property '{property_id}' in {start_date} to "
+                f"{end_date} using date aggregation: {exc}"
+            )
+
+        all_dates = sorted(set(visitors_by_day) | set(impressions_by_day))
+        return [
+            {
+                "metric_date": date_key,
+                "visitors": int(visitors_by_day.get(date_key, 0)),
+                "impressions": int(impressions_by_day.get(date_key, 0)),
+            }
+            for date_key in all_dates
+        ]

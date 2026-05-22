@@ -2,7 +2,13 @@ import unittest
 from datetime import date
 
 import tests._path  # noqa: F401
-from ga_reporter.date_utils import resolve_date_range, validate_date_range
+from ga_reporter.date_utils import (
+    business_week_end,
+    business_week_start,
+    last_completed_business_week_range,
+    resolve_date_range,
+    validate_date_range,
+)
 
 
 class TestDateUtils(unittest.TestCase):
@@ -30,12 +36,23 @@ class TestDateUtils(unittest.TestCase):
 
     def test_resolve_weekly(self) -> None:
         result = resolve_date_range("weekly", None, None, today=date(2026, 2, 18))
-        self.assertEqual(result.start_date, "2026-02-12")
+        self.assertEqual(result.start_date, "2026-02-14")
         self.assertEqual(result.end_date, "2026-02-18")
 
-    def test_resolve_monthly(self) -> None:
-        result = resolve_date_range("monthly", None, None, today=date(2026, 2, 18))
-        self.assertEqual(result.start_date, "2026-01-20")
+    def test_business_week_helpers(self) -> None:
+        start = business_week_start(date(2026, 2, 18))
+        end = business_week_end(date(2026, 2, 18))
+        self.assertEqual(start.isoformat(), "2026-02-14")
+        self.assertEqual(end.isoformat(), "2026-02-20")
+
+    def test_last_completed_business_week_range(self) -> None:
+        result = last_completed_business_week_range(date(2026, 4, 6))
+        self.assertEqual(result.start_date, "2026-03-28")
+        self.assertEqual(result.end_date, "2026-04-03")
+
+    def test_resolve_yearly(self) -> None:
+        result = resolve_date_range("yearly", None, None, today=date(2026, 2, 18))
+        self.assertEqual(result.start_date, "2025-02-19")
         self.assertEqual(result.end_date, "2026-02-18")
 
     def test_resolve_explicit_range(self) -> None:

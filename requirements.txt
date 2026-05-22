@@ -1,1 +1,7 @@
 google-analytics-data>=0.18.0
+cryptography>=46.0.0
+pandas>=2.2.0
+playwright>=1.54.0
+psycopg[binary]>=3.2.0
+requests>=2.32.0
+streamlit>=1.55.0

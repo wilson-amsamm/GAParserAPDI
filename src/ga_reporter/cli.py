@@ -12,14 +12,14 @@ def prompt_filter_selection() -> tuple[str, str | None, str | None]:
     print("Select date filter:")
     print("1. Daily")
     print("2. Weekly")
-    print("3. Monthly")
+    print("3. Yearly")
     print("4. Range")
     choice = input("Enter option number (1-4): ").strip()
 
     option_map = {
         "1": "daily",
         "2": "weekly",
-        "3": "monthly",
+        "3": "yearly",
         "4": "range",
     }
     selected = option_map.get(choice)
@@ -38,7 +38,7 @@ def parse_args(argv: list[str]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="GA4 website metrics summary CLI")
     parser.add_argument(
         "--filter",
-        choices=["daily", "weekly", "monthly", "range"],
+        choices=["daily", "weekly", "yearly", "range"],
         default="range",
         help="Date filter mode. Use 'range' with --start and --end, or choose a preset.",
     )
